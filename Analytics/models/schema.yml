@@ -1,0 +1,88 @@
+version: 2
+
+sources:
+  - name: analytics
+    database: analytics  # Specify the database
+    schema: raw  # Schema containing the raw data
+    tables:
+      - name: customers
+        description: "Raw customer data"
+        columns:
+          - name: customer_id
+            description: "Unique identifier for each customer"
+          - name: first_name
+            description: "First name of the customer"
+          - name: last_name
+            description: "Last name of the customer"
+          - name: email
+            description: "Email address of the customer"
+          - name: birthdate
+            description: "Date of birth of the customer"
+          - name: address
+            description: "Address of the customer"
+      - name: products
+        description: "Raw Products data"
+        
+models:
+  # Staging models
+  - name: stg_customers
+    description: "Staging model for raw customer data"
+    config:
+      schema: staging  # This model will be placed in the 'staging' schema
+    columns:
+      - name: customer_id
+        description: "Unique identifier for each customer"
+        tests:
+          - not_null
+          - unique
+      - name: first_name
+        description: "First name of the customer"
+        tests:
+          - not_null
+      - name: last_name
+        description: "Last name of the customer"
+        tests:
+          - not_null
+      - name: email
+        description: "Email address of the customer"
+        tests:
+          - not_null
+          - unique
+      - name: birthdate
+        description: "Date of birth of the customer"
+        tests:
+          - not_null
+      - name: address
+        description: "Address of the customer"
+        tests:
+          - not_null
+
+  # Data Mart models
+  - name: customer_dim
+    description: "Customer dimension with cleaned and transformed data"
+    config:
+      schema: data_mart  # This model will be placed in the 'data_mart' schema
+    columns:
+      - name: customer_id
+        description: "Unique identifier for each customer"
+        tests:
+          - not_null
+          - unique
+      - name: name
+        description: "Full name of the customer, concatenated from first and last name"
+        tests:
+          - not_null
+      - name: email
+        description: "Email address of the customer"
+        tests:
+          - not_null
+          - unique
+      - name: age
+        description: "Age of the customer, calculated as the difference between the current date and the birthdate"
+        tests:
+          - not_null
+          - age_greater_than_70
+      - name: address
+        description: "Address of the customer"
+        tests:
+          - not_null
